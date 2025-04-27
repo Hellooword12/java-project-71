@@ -4,11 +4,12 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.File;
-import java.math.BigInteger;
 import java.nio.file.Files;
-import java.security.MessageDigest;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 @Command(name = "gendiff", mixinStandardHelpOptions = true, version = "gendiff 1.0",
@@ -26,17 +27,38 @@ public class App implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        // Здесь будет основная логика сравнения файлов
+        // Чтение и парсинг файлов
+        Map<String, Object> data1 = parseFile(filePath1);
+        Map<String, Object> data2 = parseFile(filePath2);
+
+        // Сравнение данных
         System.out.println("Comparing files:");
-        System.out.println("File 1: " + filePath1);
-        System.out.println("File 2: " + filePath2);
+        System.out.println("File 1: " + filePath1 + ", data: " + data1);
+        System.out.println("File 2: " + filePath2 + ", data: " + data2);
         System.out.println("Format: " + format);
+
+        // Здесь будет логика сравнения данных
+
         return 0;
     }
 
-    public static void main(String[] args) {
+    private Map<String, Object> parseFile(String filePath) throws Exception {
+        String content = readFile(filePath);
+        return parseJson(content);
+    }
+
+    private String readFile(String filePath) throws Exception {
+        Path path = Paths.get(filePath);
+        return new String(Files.readAllBytes(path));
+    }
+
+    private Map<String, Object> parseJson(String content) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(content, Map.class);
+    }
+
+    public static void main(String... args) {
         int exitCode = new CommandLine(new App()).execute(args);
         System.exit(exitCode);
     }
-
 }
