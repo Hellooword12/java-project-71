@@ -6,9 +6,8 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -27,29 +26,31 @@ public class App implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        // Чтение и парсинг файлов
-        Map<String, Object> data1 = parseFile(filePath1);
-        Map<String, Object> data2 = parseFile(filePath2);
+        // Чтение и парсинг файлов из ресурсов
+        Map<String, Object> data1 = parseResourceFile(filePath1);
+        Map<String, Object> data2 = parseResourceFile(filePath2);
 
-        // Сравнение данных
         System.out.println("Comparing files:");
         System.out.println("File 1: " + filePath1 + ", data: " + data1);
         System.out.println("File 2: " + filePath2 + ", data: " + data2);
         System.out.println("Format: " + format);
 
-        // Здесь будет логика сравнения данных
-
         return 0;
     }
 
-    private Map<String, Object> parseFile(String filePath) throws Exception {
-        String content = readFile(filePath);
+    private Map<String, Object> parseResourceFile(String resourcePath) throws Exception {
+        String content = readResourceFile(resourcePath);
         return parseJson(content);
     }
 
-    private String readFile(String filePath) throws Exception {
-        Path path = Paths.get(filePath);
-        return new String(Files.readAllBytes(path));
+    private String readResourceFile(String resourcePath) throws Exception {
+        ClassLoader classLoader = getClass().getClassLoader();
+        try (InputStream inputStream = classLoader.getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                throw new IllegalArgumentException("File not found in resources: " + resourcePath);
+            }
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
 
     private Map<String, Object> parseJson(String content) throws Exception {
