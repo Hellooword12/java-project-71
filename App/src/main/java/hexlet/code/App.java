@@ -1,13 +1,18 @@
 package hexlet.code;
 
+import com.fasterxml.jackson.core.JsonParser;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -26,35 +31,41 @@ public class App implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        // Чтение и парсинг файлов из ресурсов
-        Map<String, Object> data1 = parseResourceFile(filePath1);
-        Map<String, Object> data2 = parseResourceFile(filePath2);
+        Map<String, Object> data1 = parseFile(filePath1);
+        Map<String, Object> data2 = parseFile(filePath2);
 
-        System.out.println("Comparing files:");
-        System.out.println("File 1: " + filePath1 + ", data: " + data1);
-        System.out.println("File 2: " + filePath2 + ", data: " + data2);
-        System.out.println("Format: " + format);
+        String diff = Differ.generate(data1, data2);
+        System.out.println(diff);
 
         return 0;
     }
 
-    private Map<String, Object> parseResourceFile(String resourcePath) throws Exception {
-        String content = readResourceFile(resourcePath);
+    private Map<String, Object> parseFile(String filePath) throws Exception {
+        Path path = Paths.get(filePath).toAbsolutePath().normalize();
+
+        if (!Files.exists(path)) {
+            // Попробуем найти файл в ресурсах
+            return parseResourceFile(filePath);
+        }
+
+        String content = Files.readString(path, StandardCharsets.UTF_8);
         return parseJson(content);
     }
 
-    private String readResourceFile(String resourcePath) throws Exception {
-        ClassLoader classLoader = getClass().getClassLoader();
-        try (InputStream inputStream = classLoader.getResourceAsStream(resourcePath)) {
+    private Map<String, Object> parseResourceFile(String resourcePath) throws Exception {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
-                throw new IllegalArgumentException("File not found in resources: " + resourcePath);
+                throw new FileNotFoundException("Resource not found: " + resourcePath);
             }
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            String content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            return parseJson(content);
         }
     }
 
     private Map<String, Object> parseJson(String content) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
+        // Включаем обработку комментариев на случай их наличия в JSON
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         return mapper.readValue(content, Map.class);
     }
 
