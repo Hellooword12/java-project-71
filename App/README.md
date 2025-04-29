@@ -1,6 +1,6 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/Hellooword12/java-project-71/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Hellooword12/java-project-71/actions)
-
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Hellooword12_java-project-71&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Hellooword12_java-project-71)
 # Вычислитель отличий
 ___________________________________
 В этом проекте отрабатывается работа с коллекциями и структурами данных. Изучаются способы построения и обхода деревьев.
