@@ -18,7 +18,7 @@ public class Differ {
 
                     if (!data1.containsKey(key)) {
                         return Stream.of("  + " + key + ": " + value2);
-                    }else if (!data2.containsKey(key)) {
+                    } else if (!data2.containsKey(key)) {
                         return Stream.of("  - " + key + ": " + value1);
                     } else if (!value1.equals(value2)) {
                         return Stream.of(

@@ -1,6 +1,7 @@
 package hexlet.code;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -66,8 +67,7 @@ public class App implements Callable<Integer> {
         ObjectMapper mapper = new ObjectMapper();
         // Включаем обработку комментариев на случай их наличия в JSON
         mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-        return mapper.readValue(content, Map.class);
-    }
+        return mapper.readValue(content, new TypeReference<Map<String, Object>>() { });    }
 
     public static void main(String... args) {
         int exitCode = new CommandLine(new App()).execute(args);
