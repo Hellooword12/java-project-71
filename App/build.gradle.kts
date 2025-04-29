@@ -1,4 +1,5 @@
 plugins {
+    id ("checkstyle")
     application
     id ("com.github.ben-manes.versions") version "0.52.0"
 }
@@ -18,6 +19,8 @@ java {
 application {
     mainClass = "hexlet.code.App"
 }
+
+
 
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
